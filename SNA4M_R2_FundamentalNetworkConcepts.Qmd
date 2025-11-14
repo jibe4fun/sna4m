@@ -1,0 +1,422 @@
+---
+title: "SNA R2: Fundamental Network Concepts"
+subtitle: "No R in this script, just concepts"
+author: "J. Alberto Espinosa"
+date: "11/14/2025"
+
+format: 
+   epub:
+     toc: true
+     toc-depth: 2
+     toc-expand: 2
+     toc-location: right
+
+fig-width: 10
+fig-height: 6
+fontsize: 10pt
+code-overflow: wrap
+geometry: "left = 2cm, right = 2cm, top = 2cm, bottom = 2cm"
+echo: true
+include: true
+warning: false
+message: false
+
+editor: 
+  markdown: 
+    wrap: 70
+
+abstract: This Quarto file contains an introduction to fundamental network and SNA concepts. I expand on all these concepts and discuss them in more detail in later scripts. All SNA4M R Quarto scirpts can be found at [https://github.com/jibe4fun/sna4m/tree/R-Code](https://github.com/jibe4fun/sna4m/tree/R-Code). You can also query all the lectures, R scripts and other material for this course on the [SNA4M ChatBot] (https://poe.com/SNA4M). If you are interested in predictive analytics and machine learning R code, please refer to my PAML4M book R companion in my GitHub site [https://github.com/jibe4fun/paml4m/tree/R-Code](https://github.com/jibe4fun/paml4m/tree/R-Code). If you are interested in Predictive Analytics and Machine Learning for Managers, please refer to my PAML4M book [Predictive Analytics and Machine Learning for Managers](https://www.amazon.com/dp/B0C2RX8NY1) or chat with my chatbot associated with this book at [PAML4M ChatBot](https://poe.com/PAML4M). 
+---
+
+**Notes:**
+
+1.  I include some R code in this script to render outputs or graphs
+    to complement the conceptual explanations provided in this script.
+    All scripts with the comment \`# Illustration\` are meant to
+    display graphs and outputs to complement the text narratives, and
+    there is no need to pay attention to the code, unless you want to.
+
+2.  Also, sometimes I use the parameter \`#\| eval: false\` inside
+    some R code sections marked with \`{r}\`, which simply prevents
+    the script in that chunk from executing when you render the script
+    into a document, which I use to avoid cluttering the output with
+    unnecessary displays, help information, notifications, etc. To
+    explore these commands, simply go to the respective script line
+    and run it with \`Ctrl-Enter\`.
+
+# Network Representations
+
+A **network** is a collection of **actors** and their respective
+**ties**. The graph terms for actors and ties are **vertices** and
+**edges**. Vertices are sometimes referred to as **nodes**. Any two
+vertices form a **dyad**, which is the basic unit of analysis in SNA.
+One excellent property of SNA and graph analytics methods is that the
+data can be represented and analyzed visually or quantitatively.
+
+A **visual** representation of graphs is called a **sociogram** in SNA
+and a **graph** in graph theory.
+
+```{r}
+# Illustration
+
+library(statnet) # See package installation instructions below  
+
+soc.mat <- rbind(c(0, 1, 0, 1, 0, 0),
+                 c(1, 0, 0, 1, 1, 0),
+                 c(0, 0, 0, 1, 0, 0),
+                 c(1, 1, 1, 0, 0, 0),
+                 c(0, 1, 0, 0, 0, 1),
+                 c(0, 0, 0, 0, 1, 0))  
+
+gplot(soc.mat, displaylabels = T, gmode = "graph")
+```
+
+A graph can also be represented as a **quantitative** matrix called a
+**sociomatrix** (also called an **adjacency matrix**), which makes the
+power of matrix algebra available to graph analytics and SNA. Cell
+values contain a **1** if the two related vertices have a tie (for
+**binary** networks), a **value** representing the weight or strength
+of the tie (for **weighted** networks), or **0** if the vertices don't
+have a tie.
+
+```{r}
+soc.mat
+```
+
+**Diagonal values** are often omitted when vertices don't have
+relationships of interest with themselves (i.e., recursive
+relationships).
+
+```{r}
+soc.mat.nodiag <- soc.mat # To avoid altering the original matrix
+diag(soc.mat.nodiag) <- "" # Replace all diagonals with blanks
+print(soc.mat.nodiag, quote = F)
+```
+
+# Vertex Attributes
+
+Vertices can have **attributes.** Some **vertex** attributes are
+**collected** and some are **measured**:
+
+-   **Quantitative:** e.g., age, income, education, etc.
+
+-   **Categorical:** e.g., gender, profession, nationality, etc.
+
+Some **vertex** attributes are **computed** with network metrics:
+
+-   **Quantitative:** e.g., degree centrality, betweenness centrality,
+    etc.
+
+-   **Categorical** or **Membership:** e.g., isolation, clique
+    membership, cluster, community, etc.
+
+It is this ability to compute vertex metrics, in addition to the
+measured attributes that provides the **enhanced analytical power** of
+SNA methods.
+
+# Edge Attributes
+
+Edges can also have **attributes.** Some **edge** attributes are
+**collected** and some are **measured**:
+
+-   **Quantitative:** e.g., time working together with a colleague,
+    email exchange volume with a friend, number of courses taken
+    together with a peer, etc.
+
+-   **Binary:** e.g., friends with a colleague ( yes/no), LinkedIn
+    contact with someone (yes/no), X follower (yes/no) or follwed by
+    (yes/no), etc.
+
+Some edge attributes are **computed** from network metrics:
+
+-   **Quantitative:** e.g., distance to another member, paths to a
+    colleague, walks between two members, etc.
+
+-   **Binary:** e.g., is a tie to a member reciprocal, are two
+    colleagues co-members of a clique, group or community, etc.
+
+It is this ability to collect, measure, and compute edge metrics that
+provides the **enhanced analytical power** of SNA methods.
+
+# Other Attributes
+
+In addition to vertex and edge attributes, networks possess many other
+attributes at various levels, such as:
+
+-   **Sub-Group Level:** Ego/alter network membership, clique
+    co-membership, cluster grouping, community membership, etc.
+
+-   **Network Level:** Structure, hierarchy, centralization,
+    isolation, size, number of components, etc.
+
+# Types of Networks
+
+There are multiple types of networks based on several characteristics,
+such as:
+
+-   **Topology:** that is, the configuration of the network, such as
+    star, ring, hierarchical, fully connected, etc.
+
+-   **Binary** (Yes/No, 0/1) vs. **Weighted** (i.e., edges have
+    values):
+
+    -   **Binary** networks are best for visualization and for
+        computing node metrics, such as centralities. A binary network
+        contains ties between members that have a relationship (e.g.,
+        are friends) and no tie if the actors don't have a
+        relationship (e.g., not friends).
+
+    -   **Weighted** or **valued** networks are best for quantitative
+        analysis (e.g., clustering).
+
+    -   **Dichotomized** networks are those extracted from a weighted
+        network. We often need to convert a weighted network into a
+        binary network. We do that by creating a binary network
+        containing a tie when the weight exceeds a certain
+        **threshold** (i.e., **cut**) of interest.
+
+-   **Undirected** vs. **Directed**:
+
+    -   An **undirected** network is one in which the relationships
+        does not have a direction. For example, how long have 2 people
+        known each other has no direction because the value is the
+        same for either person, consequently, the ties don't have
+        arrowheads. Undirected networks yield **symmetrical**
+        sociomatrices in which the values above the diagonal are the
+        same as those below the diagonal.
+
+    -   **A directed** network is one in which the direction of the
+        relationship matters. For example, how much person A likes
+        person B is not necessarily the same as how much person B
+        likes person A. In this case, how much A likes B is
+        represented as a tie with an arrow going from A to B. Directed
+        networks yield **asymmetrical** sociomatrices in which the
+        values above the diagonal are not necessarily the same as
+        those below the diagonal. The relationship in an asymmetric
+        sociomatrix is specified from row to column (e.g., how much
+        the row member likes the column member).
+
+-   **Simplex** vs. **Multiplex**: A simplex network is one
+    representing a single relationship (e.g., friendship). A multiplex
+    network contains two or more layers, one for each relationship
+    represented (e.g., friendship, advice, supervision, etc.).
+
+-   **1-Mode** vs. **2-Mode**: In a **1-mode** network, the row actors
+    are the same as the column actors (e.g., a group of classmates),
+    and the cells represent the relationship between row and column
+    actors. In a 2-mode network the row and column actors are
+    different (e.g., rows are students and the columns are courses
+    taken by students). A **2-mode** network can be be used to create
+    (i.e., project) 2 different **1-mode** networks, one representing
+    row x row members (e.g., student x student), with the cells
+    representing some commonality calculated for the row pairs (using
+    sums, averages, differences or correlation), and one representing
+    the column x column entities (e.g., course x course).
+
+# Useful Network Topologies
+
+A network topology is the physical or logical arrangement of vertices
+and edges within the network. These are useful when comparing networks
+or when evaluating properties of networks. For example, a star
+topology has one actor in the center with all other actors connected
+to it, but not connected to each other. This topology is important
+because it represents the most centralized network for a given network
+size. These topologies typically used for computations of network
+attributes, e.g., network centralization. These are some popular
+topologies:
+
+-   **Fully Connected:** every vertex is connected to every other
+    vertex. The distance from a member to any other member is exactly
+    one tie. A fully connected network has the maximum density
+    possible for a network of a given size.
+
+-   **Ring:** a vertex is connected to the next vertex, which in turn
+    is connected to the next vertex, and so on, until the last vertex
+    is connected to the first vertex, closing the loop.
+
+-   **Star:** it contains one central vertex with all other vertex
+    connected to it, but not connected to any other vertex. A star
+    network of n vertices has one central vertex with a degree
+    centrality of n-1 and the remaining vertices with a degree
+    centrality of 1.
+
+-   **Disconnected:** when there are no paths to connect some members
+    to other members, the network is said to be disconnected. A
+    connected network has one component, which is the actual network.
+    The members have paths to all other members, although the network
+    may not be fully connected. A disconnected network has multiple
+    components. Components are disconnected from other components.
+
+-   **Clustered:** all members are connected in triads. A member can
+    be connected with many triads, but it must be connected to at
+    least one triad. It is essentially a network with nothing but
+    triangles.
+
+-   **Hierarchical:** it is like a collection of more than one star
+    networks and they all have directed ties. Every member has either
+    no or many child vertices. The vertices without child vertices are
+    the terminal vertices. Every vertex has only one parent vertex,
+    except for the top-most vertex, which has no parent. The best way
+    to visualize a hierarchical network is to think of it as an
+    organizational chart, that is every one has subordinates, except
+    the employees at the lowest level, and every one has a boss,
+    except the top boss.
+
+# Network Analysis Methods
+
+There are two main types of network methods: quantitative and visual.
+In addition, there are a number of transformations that can be applied
+to network data to unleash the great power of the various methods.
+
+-   **Quantitative:** this method relies on matrix manipulations and
+    quantitative and statistical methods. Relationships in a network
+    can be represented as binary or weighted inside a sociomatrix,
+    which can then be inputed into the various quantitative methods
+    available.
+
+-   **Visual:** sociomatrices can be graphed and then analyzed using
+    various visual methods. For example: vertices can be sized based
+    on their centrality or other attribute; edges can be heavier or
+    lighter depending on weighted edge attributes; communities and
+    clusters can be colored and reported in informational visual
+    graphs.
+
+-   **Transformations:** these are not methods per se, but a clever
+    transformation can lead into unique insights from the data. We
+    will discuss many of these in later chapters. Some examples of
+    useful transformations include:
+
+    -   **Matricizing:** it involves converting non-network or
+        non-matrix data into matrix data. A simple example is when you
+        have a number of actors of different ages and having different
+        incomes. You could use this data to construct a matrix that
+        shows age or income differences between members. You can not
+        only use differences, but you can also use other values like
+        sums, averages, etc. Another example is to convert text to
+        relations. For example, in the Network of Thrones example,
+        analysts computed how many time every 2 actors in the novel
+        appeared together in the text no more than 15 words appart,
+        and used this count as a proximity value between them.
+
+    -   **2-Mode to 1-Mode Projections:** for example, if you have a
+        2-mode network containing students (rows) by courses
+        (columns), with a 1 if the row student took the column course.
+        You can then project this into a 1-mode student x student
+        network, with cells containing how many times the row and
+        column students took the same course.
+
+    -   **Aggregate, dichotomize, group, etc.:** sky is the limit when
+        it comes to transformations.
+
+# Levels of Network Analysis
+
+One of the strengths of network analysis is that there are many levels
+of analysis offering a rich variety of perspectives, such as:
+
+-   **Vertex (Node) Level:** collect or compute and analyze various
+    node level and ego network attributes (centrality, isolates,
+    etc.), such as:
+
+    -   **Actor Prominence:** degree, betweenness or some other
+        measure of centrality
+
+    -   **Vertex Bridge:** when the only way to establish a path
+        between two actors is through another actor, this actor is
+        called a vertex bridge
+
+    -   **Isolates:** vertices with no connections to others
+
+    -   **Ego Network:** one actor's ties to neighboring actors
+        (1-degree, i.e., 1 tie away, or n-degree, i.e., up to n ties
+        away)
+
+    -   **Structural Hole:** an actor with many ties to actors that
+        are not tied to each other (i.e., stars)
+
+-   **Edge (Tie) Level:** collect or compute and analyze relationship
+    data (strong/weak ties, tie bridges, reciprocity, transitivity,
+    etc.), such as:
+
+    -   **Edge Bridge:** when the only way to establish a path between
+        two vertices is through an edge between them, this edge is
+        called an edge bridge -- the two nodes in an edge bridge are
+        also vertex bridges
+
+    -   **Path:** a sequence of adjacent vertices and edges connecting
+        two nodes. Sometimes there is a single path between two nodes;
+        other times there are multiple paths.
+
+    -   **Distance:** the number of ties in the shortest path between
+        2 vertices, also known as the Geodesic. Note that if the
+        network is disconnected into more than one component, the
+        distance between some members will be indeterminate (i.e., the
+        distance between 2 members across unconnected components is
+        infinite).
+
+    -   **Reciprocity:** it applies to directed networks only. : if A
+        --\> B and B --\> A, the tie is reciprocal. More generally,
+        the tie between two actors can be either: none existent,
+        directional or reciprocal.
+
+-   **Sub-Group Level:** identify and analyze sub-groups, such as:
+
+    -   **Cliques:** these are N vertices fully connected (3-clique,
+        4-clique, etc.)
+
+    -   **Sub-Graphs:** a focal part of a graph (e.g., a subgroup of
+        members of the same gender or country)
+
+    -   **Components:** fully connected sub-graphs, disconnected from
+        other sub-graphs
+
+    -   **Clusters:** groups of nodes with close proximity or
+        similarity
+
+    -   **Communities:** similar to clusters. More specifically, they
+        are groups of actors with many ties within the community and
+        sparse ties to members in other communities.
+
+    -   **Triads (Transitivity):** 3-actor cliques A --\> B, A --\> C
+        and B --\> C (i.e., forming a triad or triangle). Related to
+        this, if A --\> B and B --\> C and A --\> C, means that the
+        relationship between A and C is transitive and A, B and C form
+        a triad cluster. Note: A network with high transitivity (many
+        triads) has a high clustering coefficient and, consequently,
+        it is low on structural holes (few stars)
+
+-   **Network Level:** compute and analyze key network structural
+    parameters, such as:
+
+    -   **Network Size:** Number of vertices. Some social networks are
+        small and specific (e.g., 12-member team) and can be analyzed
+        as a single network. Sometimes you have many teams, and you
+        want to predict team outcomes (e.g., 50 small teams of average
+        size of 5). Sometimes you have very large groups (e.g.,
+        communities of practice, social media groups) with thousands
+        of nodes; visualization and data collection are more
+        difficult.
+
+    -   **Network Density:** Number of ties (edges), or the proportion
+        of ties relative to the maximum number of possible ties for a
+        network of a given size. Some networks are sparse (few
+        ties/lots of weak ties) and some are dense (many ties/lots of
+        strong ties).
+
+    -   **Diameter:** is largest distance (geodesic) between actors in
+        the network
+
+    -   **Other:** Centralization, Isolation, Clustering, Hierarchy,
+        Structure, etc.
+
+-   **Multiplex Networks:** extract simplex network layers from a
+    multiplex network for each relationship of interest and analyze
+    their relationships or associations separately (e.g., correlation,
+    regression):
+
+    -   **Vertex Predictors** (gender, centrality) --\> **Vertex
+        Outcomes** (success)
+
+    -   **Edge Relationships** (supervisor, advice) --\> **Edge
+        Outcomes** (friendship)
+
+    -   **Mixed** (Vertex --\> Edge; Edge --\> Vertex)
